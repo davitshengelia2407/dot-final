@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Net Guard: interactive prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#EAF0F6;--surf:#fff;--ink:#14213D;--muted:#5B6B82;--line:#D5DEE9;--brand:#2358E8;--brand-ink:#fff;--frame:#14213D;--g:#1E9E6A;--y:#E0900B;--r:#D6364B;--tint:#F3F6FA;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0C1424;--surf:#16213A;--ink:#E8EEF8;--muted:#93A3BE;--line:#2A3857;--brand:#5B86FF;--brand-ink:#0C1424;--frame:#2A3857;--g:#3CC38C;--y:#F2AE35;--r:#F26A7C;--tint:#101A30}}
+:root[data-theme="dark"]{--bg:#0C1424;--surf:#16213A;--ink:#E8EEF8;--muted:#93A3BE;--line:#2A3857;--brand:#5B86FF;--brand-ink:#0C1424;--frame:#2A3857;--g:#3CC38C;--y:#F2AE35;--r:#F26A7C;--tint:#101A30}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Noto Sans Georgian",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.top{max-width:1180px;margin:0 auto;padding:20px 16px 8px}
+.top h1{margin:0;font-size:28px;letter-spacing:-.01em}
+.top p{margin:4px 0 14px;color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{border:1.5px solid var(--line);background:var(--surf);border-radius:999px;padding:8px 16px;font-weight:600}
+.chip[aria-pressed="true"]{border-color:var(--brand);background:var(--brand);color:var(--brand-ink)}
+.go{background:var(--ink);color:var(--bg);border:0;border-radius:10px;padding:10px 18px;font-weight:700}
+.go:disabled{opacity:.4;cursor:default}
+.ghost{background:none;border:1.5px solid var(--line);border-radius:10px;padding:9px 16px}
+.tabs{display:none;gap:6px;max-width:1180px;margin:8px auto 0;padding:0 16px}
+.tabs button{flex:1;border:1.5px solid var(--line);background:var(--surf);border-radius:10px;padding:8px;font-weight:600;position:relative}
+.tabs button[aria-selected="true"]{border-color:var(--brand);color:var(--brand)}
+.dot{position:absolute;top:6px;right:10px;width:10px;height:10px;border-radius:50%;background:var(--r);display:none}
+.stage{max-width:1180px;margin:0 auto;padding:12px 16px 40px;display:grid;grid-template-columns:360px 1fr 360px;gap:20px;align-items:start}
+.cap{margin:0 0 8px;font-weight:700;color:var(--muted);font-size:14px}
+.phone{width:100%;max-width:360px;height:640px;margin:0 auto;border:8px solid var(--frame);border-radius:38px;background:var(--surf);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.ph{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;justify-content:space-between}
+.ph b{font-size:15px}.ph small{display:block;color:var(--muted);font-size:12px}
+.sos{background:var(--r);color:#fff;border:0;border-radius:999px;padding:6px 14px;font-weight:700;font-size:13px}
+.chat{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--tint)}
+.b{max-width:82%;padding:9px 12px;border-radius:16px;font-size:15px;animation:in .25s ease}
+.b em{display:block;font-style:normal;font-size:12px;opacity:.7;margin-top:2px}
+.b.o{align-self:flex-start;background:var(--surf);border:1px solid var(--line);border-bottom-left-radius:4px}
+.b.c{align-self:flex-end;background:var(--brand);color:var(--brand-ink);border-bottom-right-radius:4px}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.b{animation:none}}
+.fake{padding:10px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surf);border-top:4px solid var(--r);padding:18px 16px;display:none;flex-direction:column;gap:10px;box-shadow:0 -8px 24px rgba(0,0,0,.18)}
+.sheet.show{display:flex}.sheet h3{margin:0;font-size:17px}.sheet p{margin:0;font-size:14px;color:var(--muted)}
+.row{display:flex;gap:8px}.row button{flex:1;border-radius:10px;padding:10px;font-weight:700;border:0}
+.pri{background:var(--brand);color:var(--brand-ink)}.sec{background:var(--tint);border:1.5px solid var(--line)!important}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:18px;padding:20px}
+.card h2{margin:0 0 10px;font-size:18px}
+.meter{height:16px;border-radius:99px;background:var(--tint);border:1px solid var(--line);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--g);transition:width .5s,background .3s}
+.big{font-size:44px;font-weight:700;line-height:1}
+.lvl{display:inline-block;border-radius:99px;padding:3px 12px;font-weight:700;font-size:13px;color:#fff;background:var(--g)}
+.lvl.y{background:var(--y);color:#14213D}.lvl.r{background:var(--r)}
+.sig{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.sig li{padding:6px 10px;border-radius:8px;background:var(--tint)}
+.note{font-size:13px;color:var(--muted);margin:12px 0 0}
+.pbody{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--tint)}
+.stat{border-radius:14px;padding:12px 14px;font-weight:700;background:var(--surf);border:1px solid var(--line);border-left:6px solid var(--g)}
+.stat.y{border-left-color:var(--y)}.stat.r{border-left-color:var(--r)}
+.al{width:100%;text-align:left;background:var(--surf);border:1px solid var(--line);border-left:6px solid var(--y);border-radius:14px;padding:12px 14px}
+.al.r{border-left-color:var(--r)}.al.res{opacity:.5}
+.al b{display:block}.al span{font-size:13px;color:var(--muted)}
+.det h3{margin:6px 0;font-size:17px}.det p{margin:0 0 8px;font-size:14px}.det ol{margin:0 0 10px;padding-left:20px;font-size:14px}
+.det .row{flex-wrap:wrap}.det .row button{flex:1 1 45%;font-size:13px}
+.back{border:0;background:none;color:var(--brand);font-weight:700;padding:0;text-align:left}
+.toast{position:absolute;left:12px;right:12px;bottom:12px;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;font-size:13px;display:none}
+.empty{color:var(--muted);font-size:14px;padding:8px}
+@media (max-width:980px){.tabs{display:flex}.stage{grid-template-columns:1fr}.stage>section{display:none}.stage[data-tab="teen"] #p-teen,.stage[data-tab="ai"] #p-ai,.stage[data-tab="parent"] #p-parent{display:block}}
+</style>
+</head>
+<body>
+<header class="top">
+<h1>Net Guard</h1>
+<p>Clickable prototype: pick a scenario and send messages to the teen’s phone. The parent is alerted automatically when it matters, and the teen can’t switch this off.</p>
+<div class="ctl" id="ctl"></div>
+</header>
+<div class="tabs" id="tabs">
+<button data-t="teen" aria-selected="true">Teen’s phone</button>
+<button data-t="ai" aria-selected="false">Net Guard AI</button>
+<button data-t="parent" aria-selected="false">Parent’s phone<span class="dot" id="dot"></span></button>
+</div>
+<main class="stage" id="stage" data-tab="teen">
+<section id="p-teen"><p class="cap">Teen’s phone, age 14</p>
+<div class="phone"><div class="ph"><div><b id="who"></b><small>Messenger</small></div><button class="sos" id="sos">SOS</button></div>
+<div class="chat" id="chat"></div><div class="fake">Message…</div>
+<div class="sheet" id="sheet"><h3>This doesn’t look safe</h3><p>You did nothing wrong. Your parent was notified automatically so they can help you.</p><div class="row"><button class="pri" id="blk">Block this person</button><button class="sec" id="cls">Close</button></div></div></div></section>
+<section id="p-ai"><p class="cap">What Net Guard sees (simulated)</p>
+<div class="card"><h2>Risk of the whole conversation</h2>
+<div class="big" id="score">0</div><div class="meter" style="margin:10px 0"><i id="bar"></i></div>
+<span class="lvl" id="lv">Green</span> <b id="cat" style="margin-left:6px">No conversation yet</b>
+<ul class="sig" id="sig"></ul>
+<p class="note" id="conf"></p>
+<p class="note">Prototype note: detection here is scripted for the demo. The real engine would analyze Georgian text, slang and Latin-letter Georgian with an AI model, and the score would follow the full conversation, not a single message.</p></div></section>
+<section id="p-parent"><p class="cap">Parent’s phone</p>
+<div class="phone"><div class="ph"><div><b>Net Guard</b><small>Protecting Nika, 14</small></div></div>
+<div class="pbody" id="pb"></div><div class="toast" id="toast"></div></div></section>
+</main>
+<script>
+var SC={
+friendly:{label:"Friendly chat",who:"Luka (classmate)",m:[["o","გამარჯობა! ხვალ ფეხბურთზე მოდიხარ?","Hi! Are you coming to football tomorrow?"],["c","კი, რა თქმა უნდა 😄","Yes, of course"],["o","მაგარია, მაშინ 5-ზე ეზოში","Great, see you in the yard at 5"]],
+s:[[3,.97,"No risk","Normal conversation between peers"],[3,.97,"No risk","Normal conversation between peers"],[2,.98,"No risk","Normal conversation between peers"]]},
+bullying:{label:"Cyberbullying",who:"Class 9B group chat",m:[["o","შენ არავის არ უნდიხარ კლასში","Nobody in class wants you"],["o","ყველას ვუთხარი რა სულელი ხარ, ჩათი დატოვე","I told everyone how stupid you are, leave the chat"],["o","ხვალ სკოლის მერე დაგელოდები, ნახავ რას გიზამ","I’ll wait for you after school tomorrow, you’ll see what I do"],["c","გთხოვ, თავი დამანებე","Please leave me alone"],["o","ვის უნდა უთხრა? დედაშენს? ყველგან გიპოვით","Who will you tell? Your mum? We’ll find you anywhere"]],
+s:[[22,.71,"Possible bullying","Exclusion language"],[54,.82,"Bullying","Insults and group pressure"],[78,.9,"Threat of violence","Threat with time and place"],[78,.9,"Threat of violence","Child asks them to stop"],[95,.94,"Threat of violence","Intimidation: “we’ll find you anywhere”"]],
+a:{y:["Hurtful messages detected","Someone in a class chat is insulting your child and pushing them out of the group.",["Stay calm. Ask how school went before mentioning the messages.","Say you noticed something worrying and you are on their side.","Keep the messages and do not reply to the sender."]],
+r:["Threat of violence","A message threatens your child after school and says they will be found anywhere.",["Talk to your child today, in person, and thank them for letting you in.","Save screenshots, then contact the school and, if needed, the police (112).","Do not confront the other child or their family alone."]]}},
+grooming:{label:"Grooming",who:"mari_14_tbilisi (new account)",m:[["o","ძალიან ლამაზი სურათი გაქვს 😍 რამდენი წლის ხარ?","You have a lovely photo. How old are you?"],["c","14","14"],["o","მეც 15 ვარ, თბილისიდან. შენნაირს არასოდეს შევხვედრივარ","I’m 15 too, from Tbilisi. I’ve never met anyone like you"],["o","ეს ჩვენ შორის დარჩეს, დედაშენს არ უთხრა, კარგი?","Keep this between us, don’t tell your mum, ok?"],["o","გადავიდეთ Telegram-ზე, იქ უფრო მშვიდად ვისაუბრებთ","Let’s move to Telegram, we can talk more calmly"],["o","გამომიგზავნე ფოტო, როგორც გთხოვე, თორემ ყველას ვეტყვი","Send the photo like I asked, or I’ll tell everyone"]],
+s:[[12,.55,"Too early to tell","Stranger asks age"],[12,.55,"Too early to tell","Child answers with age"],[38,.68,"Possible grooming","Claims same age, flattery"],[62,.84,"Grooming","Request to keep a secret"],[78,.9,"Grooming","Move to a private app"],[96,.96,"Blackmail","Threat and photo demand"]],
+a:{y:["Stranger asking personal questions","A new account asked your child’s age and used flattery. This is a common first step of grooming.",["Ask open questions, like “Who have you been chatting with lately?”","Explain that people online can pretend to be teenagers.","Agree together that new contacts get checked first."]],
+r:["Secrecy and blackmail attempt","The sender asked to keep the chat secret, moved to Telegram and threatened your child unless a photo is sent.",["Reassure your child first: they are not in trouble.","Do not delete the chat. Save screenshots and the account name.","Report to the police Cybercrime Department or call 112, and block the account after saving evidence."]]}}};
+var HELP=["Your child pressed SOS","Your child pressed the SOS button in the app.",["Call or go to your child now.","Listen first and ask questions later.","Decide together what to save and report."]];
+var $=function(i){return document.getElementById(i)};
+var st,view,open;
+function lv(s){return s>=70?"r":s>=35?"y":"g"}
+function nm(l){return l=="r"?"Red":l=="y"?"Yellow":"Green"}
+function reset(k){st={k:k||st.k,i:0,score:0,al:[],y:0,r:0};view="list";open=null;$("chat").innerHTML="";$("who").textContent=SC[st.k].who;$("sheet").classList.remove("show");$("dot").style.display="none";ctl();eng(null);par()}
+function ctl(){var h="";Object.keys(SC).forEach(function(k){h+='<button class="chip" data-k="'+k+'" aria-pressed="'+(k==st.k)+'">'+SC[k].label+'</button>'});h+='<button class="go" id="nx">Send next message</button><button class="ghost" id="rs">Reset</button>';$("ctl").innerHTML=h;$("nx").disabled=st.i>=SC[st.k].m.length}
+function eng(s){var l=lv(st.score);$("score").textContent=st.score;$("bar").style.width=st.score+"%";$("bar").style.background="var(--"+l+")";var e=$("lv");e.textContent=nm(l);e.className="lvl "+l;
+if(!s){$("cat").textContent="No conversation yet";$("sig").innerHTML="";$("conf").textContent="";return}
+$("cat").textContent=s[2];$("conf").textContent="Confidence "+Math.round(s[1]*100)+"%";
+var h="";for(var j=0;j<st.i;j++){h='<li>'+SC[st.k].s[j][3]+'</li>'+h}$("sig").innerHTML=h}
+function next(){var c=SC[st.k];if(st.i>=c.m.length)return;var m=c.m[st.i],s=c.s[st.i];st.i++;st.score=s[0];
+var d=document.createElement("div");d.className="b "+m[0];d.innerHTML=m[1]+"<em>"+m[2]+"</em>";$("chat").appendChild(d);$("chat").scrollTop=1e5;
+var l=lv(s[0]);
+if(l=="y"&&!st.y&&!st.r){st.y=1;add("y",c.a.y)}
+if(l=="r"&&!st.r){st.r=1;add("r",c.a.r);$("sheet").classList.add("show");toast("Urgent alert sent automatically")}
+eng(s);ctl();par()}
+function add(l,a){st.al.unshift({l:l,t:a[0],s:a[1],tips:a[2],res:0});$("dot").style.display="block"}
+function par(){var h="",top="g";
+st.al.forEach(function(a){if(!a.res){if(a.l=="r")top="r";else if(top!="r")top="y"}});
+if(view=="detail"){var a=st.al[open];
+h='<div class="det"><button class="back" id="bk">‹ Back</button><h3>'+a.t+'</h3><span class="lvl '+a.l+'">'+nm(a.l)+'</span><p style="margin-top:10px">'+a.s+'</p><h3>How to talk to your child</h3><ol>'+a.tips.map(function(t){return"<li>"+t+"</li>"}).join("")+'</ol><div class="row"><button class="pri" data-a="ev">Save evidence</button><button class="sec" data-a="rp">Report to police</button><button class="sec" data-a="nt">Not a threat</button></div></div>'}
+else{h='<div class="stat '+top+'">'+(top=="g"?"All clear today":top=="y"?"Needs your attention":"Urgent: talk to Nika now")+'</div>';
+if(!st.al.length)h+='<p class="empty">Net Guard only alerts you about real risks. You never see the full chat, only a short summary and advice.</p>';
+st.al.forEach(function(a,i){h+='<button class="al '+a.l+(a.res?" res":"")+'" data-o="'+i+'"><b>'+a.t+'</b><span>Just now · '+nm(a.l)+(a.res?" · marked safe":"")+'</span></button>'})}
+$("pb").innerHTML=h}
+function toast(t){var e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(function(){e.style.display="none"},2600)}
+document.addEventListener("click",function(e){var t=e.target.closest("button");if(!t)return;
+if(t.dataset.k)reset(t.dataset.k);else if(t.id=="nx")next();else if(t.id=="rs")reset();
+else if(t.id=="sos"){if(!st.al.some(function(a){return a.t==HELP[0]})){add("r",HELP);par()}$("sheet").classList.remove("show");toast("Parent notified")}
+else if(t.id=="blk"||t.id=="cls"){$("sheet").classList.remove("show")}
+else if(t.dataset.o){open=+t.dataset.o;view="detail";par();$("dot").style.display="none"}
+else if(t.id=="bk"){view="list";par()}
+else if(t.dataset.a){var a=st.al[open];if(t.dataset.a=="nt"){a.res=1;view="list";par();toast("Thanks. Net Guard will learn from this.")}else toast(t.dataset.a=="ev"?"Evidence saved, encrypted, auto-deleted in 30 days":"Report draft prepared (simulated in this prototype)")}
+else if(t.dataset.t){$("stage").dataset.tab=t.dataset.t;document.querySelectorAll("#tabs button").forEach(function(b){b.setAttribute("aria-selected",b==t)});if(t.dataset.t=="parent")$("dot").style.display="none"}});
+reset("grooming");
+</script>
+</body>
+</html>
